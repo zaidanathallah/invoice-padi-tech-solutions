@@ -181,7 +181,7 @@ export default function InvoiceDetailPage({
       {/* Printable A4 Template Card */}
       <Card
         id="printable-invoice-card"
-        className="printable-card p-8 sm:p-12 bg-white text-slate-900 shadow-xl border-slate-200 print:shadow-none print:border-none print:p-0"
+        className="printable-card p-8 sm:p-12 pb-12 sm:pb-16 bg-white text-slate-900 shadow-xl border-slate-200 print:shadow-none print:border-none print:p-0"
       >
         <CardContent className="p-0 space-y-8">
           {/* Invoice Header / Company Info */}

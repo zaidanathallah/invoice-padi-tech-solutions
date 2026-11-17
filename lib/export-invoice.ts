@@ -2,20 +2,49 @@ import { toPng, toJpeg } from 'html-to-image';
 import type { Invoice, Client, Company, InvoiceItem } from '@/types/database';
 import { formatRupiah, terbilang } from '@/lib/terbilang';
 
+// Helper to calculate exact full dimensions so exported images are never cut off
+function getExportDimensions(element: HTMLElement) {
+  const rect = element.getBoundingClientRect();
+  const scrollWidth = element.scrollWidth;
+  const scrollHeight = element.scrollHeight;
+  const offsetWidth = element.offsetWidth;
+  const offsetHeight = element.offsetHeight;
+  const clientWidth = element.clientWidth;
+  const clientHeight = element.clientHeight;
+
+  // Guarantee minimum 800px width for clean A4 proportions and no horizontal squishing
+  const width = Math.ceil(Math.max(scrollWidth, offsetWidth, clientWidth, rect.width, 800));
+
+  // Guarantee full height plus safety margin to prevent any font-metric clipping in foreignObject
+  const height = Math.ceil(Math.max(scrollHeight, offsetHeight, clientHeight, rect.height)) + 36;
+
+  return { width, height };
+}
+
 // Export as PNG
 export async function downloadInvoicePng(elementId: string, filename: string) {
   const element = document.getElementById(elementId);
   if (!element) return;
 
   try {
+    const { width, height } = getExportDimensions(element);
+
     const dataUrl = await toPng(element, {
-      quality: 0.95,
+      quality: 1,
       pixelRatio: 2,
+      width,
+      height,
+      backgroundColor: '#ffffff',
       fontEmbedCSS: '', // Fix SecurityError: Cannot access rules on cross-origin stylesheets
       cacheBust: false,
       style: {
-        overflow: 'hidden',
+        width: `${width}px`,
+        height: `${height}px`,
         maxHeight: 'none',
+        maxWidth: 'none',
+        overflow: 'visible',
+        margin: '0',
+        boxSizing: 'border-box',
       },
     });
     const link = document.createElement('a');
@@ -34,15 +63,24 @@ export async function downloadInvoiceJpg(elementId: string, filename: string) {
   if (!element) return;
 
   try {
+    const { width, height } = getExportDimensions(element);
+
     const dataUrl = await toJpeg(element, {
-      quality: 0.95,
+      quality: 0.98,
       pixelRatio: 2,
+      width,
+      height,
       backgroundColor: '#ffffff',
       fontEmbedCSS: '', // Fix SecurityError: Cannot access rules on cross-origin stylesheets
       cacheBust: false,
       style: {
-        overflow: 'hidden',
+        width: `${width}px`,
+        height: `${height}px`,
         maxHeight: 'none',
+        maxWidth: 'none',
+        overflow: 'visible',
+        margin: '0',
+        boxSizing: 'border-box',
       },
     });
     const link = document.createElement('a');
